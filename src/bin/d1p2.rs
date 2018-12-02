@@ -4,10 +4,12 @@ use std::collections::HashSet;
 fn main() {
     let mut set = HashSet::new();
     let mut freq = 0;
-    for n in parsed_input().cycle() {        
-        if set.contains(&freq) { break; } 
+    for n in parsed_input().cycle() {
+        if set.contains(&freq) {
+            break;
+        }
         set.insert(freq);
         freq += n;
-    };
+    }
     println!("{}", freq);
 }
