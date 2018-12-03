@@ -1,8 +1,9 @@
 use std::{str::FromStr, option::NoneError};
+use scan_fmt::scan_fmt;
 
 const INPUT: &str = include_str!("input.txt");
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Claim {
     pub id: u32,
     pub x: u32,

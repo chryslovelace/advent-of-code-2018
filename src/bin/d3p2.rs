@@ -1,5 +1,6 @@
 use advent_of_code_2018::d3::*;
 use std::collections::HashMap;
+use itertools::iproduct;
 
 fn main() {
     let mut map = HashMap::new();
@@ -10,5 +11,10 @@ fn main() {
             }
         }
     }
-    println!("{}", map.values().filter(|&&v| v > 1).count());
+    for claim in parsed_input() {
+        if iproduct!(claim.x..claim.x + claim.width, claim.y..claim.y + claim.height).all(|x| map[&x] == 1) {
+            println!("{}", claim.id);
+            return;
+        }
+    }
 }

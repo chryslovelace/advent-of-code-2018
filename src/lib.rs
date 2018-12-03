@@ -1,6 +1,7 @@
 #![feature(try_trait)]
 
-#[macro_use] extern crate scan_fmt;
+extern crate scan_fmt;
+extern crate itertools;
 
 pub mod d1;
 pub mod d2;
