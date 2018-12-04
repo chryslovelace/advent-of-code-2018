@@ -1,10 +1,10 @@
-use advent_of_code_2018::d2::parsed_input;
+use advent_of_code_2018::d2::ids;
 use std::collections::{HashMap, HashSet};
 
 fn main() {
     let mut twos = 0;
     let mut threes = 0;
-    for id in parsed_input() {
+    for id in ids() {
         let counts = letter_counts(id);
         if counts.contains(&2) {
             twos += 1;

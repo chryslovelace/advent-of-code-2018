@@ -1,4 +1,4 @@
-use std::{str::FromStr, option::NoneError};
+use std::{collections::HashMap, str::FromStr, option::NoneError};
 use scan_fmt::scan_fmt;
 
 const INPUT: &str = include_str!("input.txt");
@@ -35,16 +35,18 @@ impl FromStr for Claim {
     }
 }
 
-pub fn parsed_input() -> impl Iterator<Item = Claim> {
+pub fn claims() -> impl Iterator<Item = Claim> {
     INPUT.lines().map(|x| x.parse().unwrap())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::parsed_input;
-
-    #[test]
-    fn test_parse(){
-        println!("{:?}", parsed_input().next().unwrap());
+pub fn fabric_claimed() -> HashMap<(u32, u32), u32> {
+    let mut map = HashMap::new();
+    for claim in claims() {
+        for x in claim.x..claim.x + claim.width {
+            for y in claim.y..claim.y + claim.height {
+                *map.entry((x, y)).or_insert(0) += 1;
+            }
+        }
     }
+    map
 }

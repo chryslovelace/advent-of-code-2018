@@ -1,5 +1,5 @@
-use advent_of_code_2018::d1::parsed_input;
+use advent_of_code_2018::d1::frequency_changes;
 
 fn main() {
-    println!("{}", parsed_input().sum::<i32>());
+    println!("{}", frequency_changes().sum::<i32>());
 }

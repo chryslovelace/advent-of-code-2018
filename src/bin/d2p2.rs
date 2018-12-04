@@ -1,8 +1,8 @@
-use advent_of_code_2018::{d2::parsed_input, util::IteratorExt};
+use advent_of_code_2018::{d2::ids, util::IteratorExt};
 
 fn main() {
-    for id1 in parsed_input() {
-        for id2 in parsed_input() {
+    for id1 in ids() {
+        for id2 in ids() {
             let unmatched_pair = id1
                 .chars()
                 .zip(id2.chars())
