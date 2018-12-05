@@ -1,3 +1,5 @@
+use std::mem::swap;
+
 const INPUT: &str = include_str!("input.txt");
 
 pub fn input() -> &'static str {
@@ -6,8 +8,8 @@ pub fn input() -> &'static str {
 
 pub fn react(s: &str) -> String {
     let mut curr = s.to_string();
+    let mut next = String::with_capacity(curr.len());
     loop {
-        let mut next = String::new();
         let mut chars = curr.chars().peekable();
         while let Some(a) = chars.next() {
             if reacts(a, chars.peek()) {
@@ -19,7 +21,8 @@ pub fn react(s: &str) -> String {
         if curr == next {
             break;
         }
-        curr = next;
+        swap(&mut curr, &mut next);
+        next.clear();
     }
     curr
 }
