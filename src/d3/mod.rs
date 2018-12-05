@@ -1,5 +1,5 @@
-use std::{collections::HashMap, str::FromStr, option::NoneError};
 use scan_fmt::scan_fmt;
+use std::{collections::HashMap, option::NoneError, str::FromStr};
 
 const INPUT: &str = include_str!("input.txt");
 
@@ -9,7 +9,7 @@ pub struct Claim {
     pub x: u32,
     pub y: u32,
     pub width: u32,
-    pub height: u32
+    pub height: u32,
 }
 
 #[derive(Debug)]
@@ -24,13 +24,14 @@ impl From<NoneError> for ClaimParseError {
 impl FromStr for Claim {
     type Err = ClaimParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (id, x, y, width, height) = scan_fmt!(s, "#{d} @ {d},{d}: {d}x{d}", u32, u32, u32, u32, u32);
+        let (id, x, y, width, height) =
+            scan_fmt!(s, "#{d} @ {d},{d}: {d}x{d}", u32, u32, u32, u32, u32);
         Ok(Claim {
             id: id?,
             x: x?,
             y: y?,
             width: width?,
-            height: height?
+            height: height?,
         })
     }
 }
