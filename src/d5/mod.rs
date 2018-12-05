@@ -19,12 +19,11 @@ pub fn react(s: &str) -> String {
             }
         }
         if curr == next {
-            break;
+            return curr;
         }
         swap(&mut curr, &mut next);
         next.clear();
     }
-    curr
 }
 
 fn reacts(a: char, b: Option<&char>) -> bool {
