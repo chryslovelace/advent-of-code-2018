@@ -37,13 +37,9 @@ fn main() {
                 worker.elapsed += 1;
             }            
         }
-        print!("{} ", time);
-        for worker in &workers {
-            print!("{} ", worker.step.unwrap_or("."));
-        }
-        println!("{}", completed);
         time += 1;        
     }
+    println!("{}", time - 1);
 }
 
 fn time_needed(step: &str) -> u8 {
