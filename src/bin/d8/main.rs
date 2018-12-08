@@ -1,12 +1,32 @@
-const INPUT: &str = include_str!("input.txt");
+#![feature(split_ascii_whitespace)]
+
+use lazy_static::lazy_static;
+
+fn main() {
+    part1();
+    part2();
+}
+
+lazy_static! {
+    static ref TREE: Node = {
+        let mut input = include_str!("input.txt")
+            .split_ascii_whitespace()
+            .map(|s| s.parse().unwrap());
+        Node::build(&mut input)
+    };
+}
+
+fn part1() {
+    println!("{}", TREE.sum_metadata());
+}
+
+fn part2() {
+    println!("{}", TREE.value());
+}
 
 type Datum = u8;
 
-fn input() -> impl Iterator<Item = Datum> {
-    INPUT.split_ascii_whitespace().map(|s| s.parse().unwrap())
-}
-
-pub struct Node {
+struct Node {
     children: Vec<Node>,
     metadata: Vec<Datum>,
 }
@@ -21,7 +41,7 @@ impl Node {
         }
     }
 
-    pub fn sum_metadata(&self) -> u32 {
+    fn sum_metadata(&self) -> u32 {
         let mut sum = self.metadata.iter().map(|&x| x as u32).sum::<u32>();
         for child in &self.children {
             sum += child.sum_metadata();
@@ -29,7 +49,7 @@ impl Node {
         sum
     }
 
-    pub fn value(&self) -> u32 {
+    fn value(&self) -> u32 {
         if self.children.len() == 0 {
             self.metadata.iter().map(|&x| x as u32).sum::<u32>()
         } else {
@@ -39,8 +59,4 @@ impl Node {
                 .fold(0, |acc, &i| acc + self.children[i as usize - 1].value())
         }
     }
-}
-
-pub fn tree() -> Node {
-    Node::build(&mut input())
 }
