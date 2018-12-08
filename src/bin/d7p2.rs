@@ -20,24 +20,24 @@ fn main() {
                     completed.push_str(step);
                     worker.step = None;
                     worker.elapsed = 0;
-                } 
+                }
             }
         }
         for worker in &mut workers {
             if worker.step.is_none() {
                 worker.step = steps
                     .iter()
-                    .find(|step| !worked_on.contains(step.name) && step.prereqs.chars().all(|prereq| completed.contains(prereq)))
-                    .map(|step| step.name); 
+                    .find(|step| step.is_ready(&worked_on, &completed))
+                    .map(|step| step.name);
             }
             if let Some(step) = worker.step {
                 if !worked_on.contains(step) {
                     worked_on.push_str(step);
                 }
                 worker.elapsed += 1;
-            }            
+            }
         }
-        time += 1;        
+        time += 1;
     }
     println!("{}", time - 1);
 }

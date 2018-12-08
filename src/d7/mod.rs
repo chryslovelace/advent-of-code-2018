@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 const INPUT: &str = include_str!("input.txt");
 
@@ -10,23 +10,36 @@ fn constraints() -> impl Iterator<Item = (&'static str, &'static str)> {
 #[derive(Debug)]
 pub struct Step {
     pub name: &'static str,
-    pub prereqs: String
+    pub prereqs: String,
 }
 
 impl Step {
     fn new(name: &'static str) -> Self {
         Step {
             name,
-            prereqs: String::new()
+            prereqs: String::new(),
         }
+    }
+
+    pub fn is_ready(&self, started: &str, completed: &str) -> bool {
+        !started.contains(&self.name)
+            && self
+                .prereqs
+                .chars()
+                .all(|prereq| completed.contains(prereq))
     }
 }
 
-pub fn steps() -> Vec<Step> { 
+pub fn steps() -> Vec<Step> {
     let mut map = HashMap::new();
     for (prereq, step) in constraints() {
-        map.entry(step).or_insert_with(|| Step::new(step)).prereqs.push_str(prereq);
+        map.entry(step)
+            .or_insert_with(|| Step::new(step))
+            .prereqs
+            .push_str(prereq);
         map.entry(prereq).or_insert_with(|| Step::new(prereq));
     }
-    map.drain().map(|(_, step)| step).sorted_by_key(|step| step.name)
+    map.drain()
+        .map(|(_, step)| step)
+        .sorted_by_key(|step| step.name)
 }
