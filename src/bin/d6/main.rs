@@ -1,3 +1,4 @@
+use itertools::iproduct;
 use lazy_static::lazy_static;
 use scan_fmt::scan_fmt;
 use std::{
@@ -23,41 +24,29 @@ lazy_static! {
 fn part1() {
     let mut hull = HashSet::new();
     let mut areas = HashMap::new();
-    for i in 0..500 {
-        for j in 0..500 {
-            if let Some(closest) = COORDINATES
-                .iter()
-                .single_min_by_key(|&&point| manhattan(point, (i, j)))
-            {
-                if i == 0 || i == 499 || j == 0 || j == 499 {
-                    hull.insert(closest);
-                }
-                *areas.entry(closest).or_insert(0) += 1;
+    for (i, j) in iproduct!(0..500, 0..500) {
+        if let Some(closest) = COORDINATES
+            .iter()
+            .single_min_by_key(|&&point| manhattan(point, (i, j)))
+        {
+            if i == 0 || i == 499 || j == 0 || j == 499 {
+                hull.insert(closest);
             }
-        }
+            *areas.entry(closest).or_insert(0) += 1;
+        }    
     }
     let (_, area) = areas
         .iter()
-        .filter(|(point, _)| !hull.contains(*point))
+        .filter(|(&point, _)| !hull.contains(point))
         .max_by_key(|(_, &area)| area)
         .unwrap();
     println!("{}", area);
 }
 
 fn part2() {
-    let mut safe_region_size = 0;
-    for i in 0..500 {
-        for j in 0..500 {
-            if COORDINATES
-                .iter()
-                .map(|&point| manhattan(point, (i, j)))
-                .sum::<i32>()
-                < 10000
-            {
-                safe_region_size += 1;
-            }
-        }
-    }
+    let safe_region_size = iproduct!(0..500, 0..500)
+        .filter(|&a| COORDINATES.iter().map(|&b| manhattan(a, b)).sum::<i32>() < 10000)
+        .count();
     println!("{}", safe_region_size);
 }
 

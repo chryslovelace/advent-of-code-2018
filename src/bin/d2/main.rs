@@ -29,7 +29,7 @@ fn part1() {
         for c in id.chars() {
             *map.entry(c).or_insert(0) += 1;
         }
-        map.values().cloned().collect::<HashSet<_>>()
+        map.drain().map(|(_, count)| count).collect()
     }
 }
 
