@@ -33,17 +33,18 @@ fn part1() {
 }
 
 fn part2() {
-    for claim in CLAIMS.iter() {
-        if iproduct!(
-            claim.x..claim.x + claim.width,
-            claim.y..claim.y + claim.height
-        )
-        .all(|x| FABRIC_CLAIMED[&x] == 1)
-        {
-            println!("{}", claim.id);
-            return;
-        }
-    }
+    let claim = CLAIMS
+        .iter()
+        .find(|claim| {
+            iproduct!(
+                claim.x..claim.x + claim.width,
+                claim.y..claim.y + claim.height
+            )
+            .all(|x| FABRIC_CLAIMED[&x] == 1)
+        })
+        .unwrap();
+
+    println!("{}", claim.id);
 }
 
 struct Claim {
