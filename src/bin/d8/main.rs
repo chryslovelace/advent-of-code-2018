@@ -42,7 +42,7 @@ impl Node {
     }
 
     fn sum_metadata(&self) -> u32 {
-        let mut sum = self.metadata.iter().map(|&x| x as u32).sum::<u32>();
+        let mut sum = self.metadata.iter().map(|&x| u32::from(x)).sum::<u32>();
         for child in &self.children {
             sum += child.sum_metadata();
         }
@@ -50,8 +50,8 @@ impl Node {
     }
 
     fn value(&self) -> u32 {
-        if self.children.len() == 0 {
-            self.metadata.iter().map(|&x| x as u32).sum::<u32>()
+        if self.children.is_empty() {
+            self.metadata.iter().map(|&x| u32::from(x)).sum::<u32>()
         } else {
             self.metadata
                 .iter()
