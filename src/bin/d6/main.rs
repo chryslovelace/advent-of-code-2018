@@ -33,7 +33,7 @@ fn part1() {
                 hull.insert(closest);
             }
             *areas.entry(closest).or_insert(0) += 1;
-        }    
+        }
     }
     let (_, area) = areas
         .iter()
