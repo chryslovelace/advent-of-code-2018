@@ -57,7 +57,7 @@ impl Game {
         }
     }
 
-    fn get_high_score(&self) -> usize {
+    fn high_score(&self) -> usize {
         let mut scores = vec![0; self.num_players];
         let mut circle = LinkedList::new(MarbleAdapter::new());
         circle.push_front(Marble::new(0));
@@ -85,10 +85,10 @@ impl Game {
 
 fn part1() {
     let game = Game::new(NUM_PLAYERS, NUM_MARBLES);
-    println!("{}", game.get_high_score());
+    println!("{}", game.high_score());
 }
 
 fn part2() {
     let game = Game::new(NUM_PLAYERS, NUM_MARBLES * 100);
-    println!("{}", game.get_high_score());
+    println!("{}", game.high_score());
 }
