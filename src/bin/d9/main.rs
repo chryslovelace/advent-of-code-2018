@@ -1,5 +1,4 @@
 use intrusive_collections::{intrusive_adapter, LinkedList, LinkedListLink};
-use std::collections::HashMap;
 
 fn main() {
     part1();
@@ -59,14 +58,14 @@ impl Game {
     }
 
     fn get_high_score(&self) -> usize {
-        let mut scores = HashMap::new();
+        let mut scores = vec![0; self.num_players];
         let mut circle = LinkedList::new(MarbleAdapter::new());
         circle.push_front(Marble::new(0));
         let mut curr_player = 0;
         let mut curr_marble = circle.front_mut();
         for marble in 1..=self.num_marbles {
             if marble % 23 == 0 {
-                let player_score = scores.entry(curr_player).or_insert(0);
+                let player_score = &mut scores[curr_player];
                 *player_score += marble;
                 for _ in 0..7 {
                     ccw!(curr_marble);
@@ -80,7 +79,7 @@ impl Game {
             }
             curr_player = (curr_player + 1) % self.num_players;
         }
-        *scores.values().max().unwrap()
+        *scores.iter().max().unwrap()
     }
 }
 
