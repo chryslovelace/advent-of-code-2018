@@ -1,11 +1,6 @@
 use lazy_static::lazy_static;
 use std::collections::HashSet;
 
-fn main() {
-    part1();
-    part2();
-}
-
 lazy_static! {
     static ref FREQUENCY_CHANGES: Vec<i32> = include_str!("input.txt")
         .lines()
@@ -28,4 +23,9 @@ fn part2() {
         freq += n;
     }
     println!("{}", freq);
+}
+
+fn main() {
+    part1();
+    part2();
 }
