@@ -1,10 +1,5 @@
 use intrusive_collections::{intrusive_adapter, LinkedList, LinkedListLink};
 
-fn main() {
-    part1();
-    part2();
-}
-
 const NUM_PLAYERS: usize = 455;
 const NUM_MARBLES: usize = 71223;
 
@@ -91,4 +86,9 @@ fn part1() {
 fn part2() {
     let game = Game::new(NUM_PLAYERS, NUM_MARBLES * 100);
     println!("{}", game.high_score());
+}
+
+fn main() {
+    part1();
+    part2();
 }

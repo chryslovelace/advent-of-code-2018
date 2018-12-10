@@ -1,13 +1,24 @@
 use lazy_static::lazy_static;
 use std::collections::{HashMap, HashSet};
 
-fn main() {
-    part1();
-    part2();
-}
-
 lazy_static! {
     static ref IDS: Vec<&'static str> = include_str!("input.txt").lines().collect();
+}
+
+trait IteratorExt: Iterator {
+    fn single(self) -> Option<Self::Item>;
+}
+
+impl<I: Iterator> IteratorExt for I {
+    fn single(mut self) -> Option<Self::Item> {
+        self.next().and_then(|elem| {
+            if self.next().is_none() {
+                Some(elem)
+            } else {
+                None
+            }
+        })
+    }
 }
 
 fn part1() {
@@ -49,18 +60,7 @@ fn part2() {
     }
 }
 
-trait IteratorExt: Iterator {
-    fn single(self) -> Option<Self::Item>;
-}
-
-impl<I: Iterator> IteratorExt for I {
-    fn single(mut self) -> Option<Self::Item> {
-        self.next().and_then(|elem| {
-            if self.next().is_none() {
-                Some(elem)
-            } else {
-                None
-            }
-        })
-    }
+fn main() {
+    part1();
+    part2();
 }

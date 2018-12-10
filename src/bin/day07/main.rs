@@ -2,9 +2,26 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
-fn main() {
-    part1();
-    part2();
+struct Step {
+    name: &'static str,
+    prereqs: String,
+}
+
+impl Step {
+    fn new(name: &'static str) -> Self {
+        Step {
+            name,
+            prereqs: String::new(),
+        }
+    }
+
+    fn is_ready(&self, started: &str, completed: &str) -> bool {
+        !started.contains(&self.name)
+            && self
+                .prereqs
+                .chars()
+                .all(|prereq| completed.contains(prereq))
+    }
 }
 
 lazy_static! {
@@ -83,24 +100,7 @@ fn part2() {
     }
 }
 
-struct Step {
-    name: &'static str,
-    prereqs: String,
-}
-
-impl Step {
-    fn new(name: &'static str) -> Self {
-        Step {
-            name,
-            prereqs: String::new(),
-        }
-    }
-
-    fn is_ready(&self, started: &str, completed: &str) -> bool {
-        !started.contains(&self.name)
-            && self
-                .prereqs
-                .chars()
-                .all(|prereq| completed.contains(prereq))
-    }
+fn main() {
+    part1();
+    part2();
 }

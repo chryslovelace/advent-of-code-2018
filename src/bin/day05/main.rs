@@ -1,25 +1,8 @@
 use lazy_static::lazy_static;
 use std::mem::swap;
 
-fn main() {
-    part1();
-    part2();
-}
-
 lazy_static! {
     static ref POLYMER: &'static str = include_str!("input.txt").trim();
-}
-
-fn part1() {
-    println!("{}", react(*POLYMER).len());
-}
-
-fn part2() {
-    let result = (b'a'..=b'z')
-        .map(|c| react(&POLYMER.replace(|d: char| c as char == d.to_ascii_lowercase(), "")).len())
-        .min()
-        .unwrap();
-    println!("{}", result);
 }
 
 fn react(s: &str) -> String {
@@ -52,4 +35,21 @@ fn react(s: &str) -> String {
             false
         }
     }
+}
+
+fn part1() {
+    println!("{}", react(*POLYMER).len());
+}
+
+fn part2() {
+    let result = (b'a'..=b'z')
+        .map(|c| react(&POLYMER.replace(|d: char| c as char == d.to_ascii_lowercase(), "")).len())
+        .min()
+        .unwrap();
+    println!("{}", result);
+}
+
+fn main() {
+    part1();
+    part2();
 }

@@ -48,6 +48,41 @@ lazy_static! {
     };
 }
 
+fn get_bbox(stars: &[Star]) -> Rect {
+    let (left, right) = stars
+        .iter()
+        .map(|s| s.pos.0)
+        .minmax()
+        .into_option()
+        .unwrap();
+    let (top, bottom) = stars
+        .iter()
+        .map(|s| s.pos.1)
+        .minmax()
+        .into_option()
+        .unwrap();
+    Rect {
+        top,
+        left,
+        bottom,
+        right,
+    }
+}
+
+fn render(stars: &[Star], bbox: &Rect) {
+    let positions: HashSet<_> = stars.iter().map(|s| s.pos).collect();
+    for y in bbox.top..=bbox.bottom {
+        for x in bbox.left..=bbox.right {
+            if positions.contains(&(x, y)) {
+                print!("#");
+            } else {
+                print!(" ");
+            }
+        }
+        println!();
+    }
+}
+
 fn main() {
     let mut stars = STARS.clone();
     let mut bboxes = Vec::with_capacity(20000);
@@ -68,41 +103,5 @@ fn main() {
         star.take_steps(step as i32);
     }
     render(&stars, &bbox);
-    println!("step: {}", step);
-}
-
-fn render(stars: &[Star], bbox: &Rect) {
-    //println!("{} {:?}", stars.len(), stars);
-    let positions: HashSet<_> = stars.iter().map(|s| s.pos).collect();
-    for y in bbox.top..=bbox.bottom {
-        for x in bbox.left..=bbox.right {
-            if positions.contains(&(x, y)) {
-                print!("#");
-            } else {
-                print!(" ");
-            }
-        }
-        println!();
-    }
-}
-
-fn get_bbox(stars: &[Star]) -> Rect {
-    let (left, right) = stars
-        .iter()
-        .map(|s| s.pos.0)
-        .minmax()
-        .into_option()
-        .unwrap();
-    let (top, bottom) = stars
-        .iter()
-        .map(|s| s.pos.1)
-        .minmax()
-        .into_option()
-        .unwrap();
-    Rect {
-        top,
-        left,
-        bottom,
-        right,
-    }
+    println!("{}", step);
 }

@@ -2,28 +2,6 @@
 
 use lazy_static::lazy_static;
 
-fn main() {
-    part1();
-    part2();
-}
-
-lazy_static! {
-    static ref TREE: Node = {
-        let mut input = include_str!("input.txt")
-            .split_ascii_whitespace()
-            .map(|s| s.parse().unwrap());
-        Node::build(&mut input)
-    };
-}
-
-fn part1() {
-    println!("{}", TREE.sum_metadata());
-}
-
-fn part2() {
-    println!("{}", TREE.value());
-}
-
 type Datum = u8;
 
 struct Node {
@@ -59,4 +37,26 @@ impl Node {
                 .fold(0, |acc, &i| acc + self.children[i as usize - 1].value())
         }
     }
+}
+
+lazy_static! {
+    static ref TREE: Node = {
+        let mut input = include_str!("input.txt")
+            .split_ascii_whitespace()
+            .map(|s| s.parse().unwrap());
+        Node::build(&mut input)
+    };
+}
+
+fn part1() {
+    println!("{}", TREE.sum_metadata());
+}
+
+fn part2() {
+    println!("{}", TREE.value());
+}
+
+fn main() {
+    part1();
+    part2();
 }

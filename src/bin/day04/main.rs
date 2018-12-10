@@ -4,11 +4,6 @@ use lazy_static::lazy_static;
 use scan_fmt::scan_fmt;
 use std::collections::HashMap;
 
-fn main() {
-    part1();
-    part2();
-}
-
 lazy_static! {
     static ref SLEEPYTIME: HashMap<u32, [u32; 60]> = {
         let mut entries = include_str!("input.txt")
@@ -54,4 +49,9 @@ fn part2() {
         .unwrap();
     let minute = (0..60).max_by_key(|&i| minutes[i as usize]).unwrap();
     println!("{}", id * minute);
+}
+
+fn main() {
+    part1();
+    part2();
 }
