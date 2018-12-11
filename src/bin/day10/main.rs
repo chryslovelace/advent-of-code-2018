@@ -74,7 +74,7 @@ fn render(stars: &[Star], bbox: &Rect) {
     for y in bbox.top..=bbox.bottom {
         for x in bbox.left..=bbox.right {
             if positions.contains(&(x, y)) {
-                print!("#");
+                print!("█");
             } else {
                 print!(" ");
             }
@@ -98,9 +98,8 @@ fn main() {
         .min_by_key(|(_, bbox)| bbox.area())
         .unwrap();
 
-    let mut stars = STARS.clone();
     for star in &mut stars {
-        star.take_steps(step as i32);
+        star.take_steps(step as i32 - 20000);
     }
     render(&stars, &bbox);
     println!("{}", step);
