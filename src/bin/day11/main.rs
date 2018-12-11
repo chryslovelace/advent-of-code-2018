@@ -17,19 +17,16 @@ fn part1() {
 
 fn part2() {
     let (x, y, size, _) = iproduct!(1..301, 1..301)
-        .map(|(x, y)| {
-            (1..=(301 - max(x, y)))
-                .scan(0, |power, size| {
-                    *power += (x..x + size)
-                        .map(|xx| get_power((xx, y + size - 1)))
-                        .sum::<i32>()
-                        + (y..y + size - 1)
-                            .map(|yy| get_power((x + size - 1, yy)))
-                            .sum::<i32>();
-                    Some((x, y, size, *power))
-                })
-                .max_by_key(|&(_, _, _, power)| power)
-                .unwrap()
+        .flat_map(|(x, y)| {
+            (1..(302 - max(x, y))).scan(0, move |power, size| {
+                *power += (x..x + size)
+                    .map(|x| get_power((x, y + size - 1)))
+                    .sum::<i32>();
+                *power += (y..y + size - 1)
+                    .map(|y| get_power((x + size - 1, y)))
+                    .sum::<i32>();
+                Some((x, y, size, *power))
+            })
         })
         .max_by_key(|&(_, _, _, power)| power)
         .unwrap();
