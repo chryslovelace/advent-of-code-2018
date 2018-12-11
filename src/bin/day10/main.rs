@@ -74,9 +74,9 @@ fn render(stars: &[Star], bbox: &Rect) {
     for y in bbox.top..=bbox.bottom {
         for x in bbox.left..=bbox.right {
             if positions.contains(&(x, y)) {
-                print!("█");
+                print!("██");
             } else {
-                print!(" ");
+                print!("  ");
             }
         }
         println!();
