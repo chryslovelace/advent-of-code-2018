@@ -18,7 +18,10 @@ impl State {
     }
 
     fn matches(&self, pos: isize, rule: &Rule) -> bool {
-        rule.pattern.iter().zip(pos - 2..).all(|(&pat, pos)| self.has_plant(pos) == pat)
+        rule.pattern
+            .iter()
+            .zip(pos - 2..)
+            .all(|(&pat, pos)| self.has_plant(pos) == pat)
     }
 
     fn next_state(&mut self, rules: &[Rule]) {
@@ -40,6 +43,10 @@ impl State {
             self.0.remove(&pos);
         }
     }
+
+    fn sum(&self) -> isize {
+        self.0.iter().sum()
+    }
 }
 
 struct Rule {
@@ -59,7 +66,6 @@ lazy_static! {
                 .collect(),
         )
     };
-
     static ref RULES: Vec<Rule> = {
         INPUT
             .lines()
@@ -69,22 +75,27 @@ lazy_static! {
                 for (i, c) in line[..5].chars().enumerate() {
                     pattern[i] = c == '#';
                 }
-                let result = line.chars().next_back().unwrap() == '#';
+                let result = line.ends_with('#');
                 Rule { pattern, result }
             })
             .collect()
     };
 }
 
-fn main() {
+fn part1() {
     let mut state = INITIAL_STATE.clone();
     for _ in 0..20 {
         state.next_state(&*RULES);
     }
-    println!("{}", state.0.iter().sum::<isize>());
-    
-    for _ in 0..50000000000isize - 20 {
-        state.next_state(&*RULES);
-    }
-    println!("{}", state.0.iter().sum::<isize>());
+    println!("{}", state.sum());
+}
+
+fn part2() {
+    // i found this out by printing the sum every 1k steps and finding the pattern
+    println!("{}", 50_000_000_000isize * 59 + 1598);
+}
+
+fn main() {
+    part1();
+    part2();
 }
