@@ -109,27 +109,28 @@ struct State {
 impl State {
     fn new(input: &str) -> Self {
         let mut carts = Vec::new();
-        let track = input.lines().enumerate().map(|(y, line)| line.bytes().enumerate().map(|(x, c)| {
+        let track = input.lines().enumerate().map(|(y, line)| line.chars().enumerate().map(|(x, c)| {
             use self::{Direction::*, TrackType::*};
             match c {
-                b'|' => Vertical,
-                b'-' => Horizontal,
-                b'\\' => Diagonal,
-                b'/' => Antidiagonal,
-                b'+' => Intersection,
-                b'^' => {
+                '|' => Vertical,
+                '-' => Horizontal,
+                '\\' => Diagonal,
+                '/' => Antidiagonal,
+                '+' => Intersection,
+                // look at these cute friends!!!!!!
+                '^' => {
                     carts.push(Cart::new(x, y, Up));
                     Vertical
                 },
-                b'v' => {
+                'v' => {
                     carts.push(Cart::new(x, y, Down));
                     Vertical
                 },
-                b'<' => {
+                '<' => {
                     carts.push(Cart::new(x, y, Left));
                     Horizontal
                 },
-                b'>' => {
+                '>' => {
                     carts.push(Cart::new(x, y, Right));
                     Horizontal
                 },
