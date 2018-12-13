@@ -1,5 +1,3 @@
-use std::fmt;
-
 #[derive(Debug, Clone, Copy)]
 enum TrackType {
     Empty,
@@ -40,7 +38,7 @@ impl Direction {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 struct Cart {
     pos: (usize, usize),
     dir: Direction,
@@ -94,22 +92,11 @@ impl Cart {
 }
 
 #[derive(Debug)]
-struct Track {
-    track: String,
-    width: usize,
-}
-
+struct Track(Vec<Vec<TrackType>>);
+    
 impl Track {
-    fn at(&self, x: usize, y: usize) -> TrackType {
-        let i = self.width * y + x;
-        match &self.track[i..i + 1] {
-            "|" => TrackType::Vertical,
-            "-" => TrackType::Horizontal,
-            "\\" => TrackType::Diagonal,
-            "/" => TrackType::Antidiagonal,
-            "+" => TrackType::Intersection,
-            _ => TrackType::Empty,
-        }
+    fn at(&self, x: usize, y: usize) -> TrackType {        
+        self.0[y][x] 
     }
 }
 
@@ -121,106 +108,104 @@ struct State {
 
 impl State {
     fn new(input: &str) -> Self {
-        let width = input.chars().position(|c| c == '\n' || c == '\r').unwrap();
         let mut carts = Vec::new();
-        let mut track = String::new();
-        for (i, mut c) in input.chars().enumerate() {
+        let track = input.lines().enumerate().map(|(y, line)| line.bytes().enumerate().map(|(x, c)| {
+            use self::{Direction::*, TrackType::*};
             match c {
-                // look at these cute friends!!!!!!!!!!
-                '^' | 'v' | '<' | '>' => {
-                    let (dir, c) = match c {
-                        '^' => (Direction::Up, '|'),
-                        'v' => (Direction::Down, '|'),
-                        '<' => (Direction::Left, '-'),
-                        '>' => (Direction::Right, '-'),
-                        _ => unreachable!("somethings bad"),
-                    };
-                    carts.push(Cart::new(i % width, i / width, dir));
-                    track.push(c);
-                }
-                _ => track.push(c),
+                b'|' => Vertical,
+                b'-' => Horizontal,
+                b'\\' => Diagonal,
+                b'/' => Antidiagonal,
+                b'+' => Intersection,
+                b'^' => {
+                    carts.push(Cart::new(x, y, Up));
+                    Vertical
+                },
+                b'v' => {
+                    carts.push(Cart::new(x, y, Down));
+                    Vertical
+                },
+                b'<' => {
+                    carts.push(Cart::new(x, y, Left));
+                    Horizontal
+                },
+                b'>' => {
+                    carts.push(Cart::new(x, y, Right));
+                    Horizontal
+                },
+                _ => Empty,
             }
-        }
+        }).collect()).collect();
 
         carts.sort_by_key(|&Cart { pos: (x, y), .. }| (y, x));
 
         State {
             carts,
-            track: Track { track, width },
+            track: Track(track),
         }
     }
 
-    fn pos(&self, i: usize) -> (usize, usize) {
-        (i % self.track.width, i / self.track.width)
-    }
 
-    fn cart_at(carts: &[Cart], x: usize, y: usize) -> Option<&Cart> {
+    fn cart_at(carts: &[Cart], x: usize, y: usize) -> Option<usize> {
         carts
             .binary_search_by_key(&(y, x), |&Cart { pos: (x, y), .. }| (y, x))
             .ok()
-            .map(|i| &carts[i])
     }
 
-    fn tick(&mut self) -> Result<(), (usize, usize)> {
+    fn tick(&mut self) -> Vec<(usize, usize)> {
         let mut next_carts = Vec::new();
+        let mut collisions = Vec::new();
+        let mut collided_idxs = Vec::new();
         for (i, cart) in self.carts.iter().enumerate() {
+            if collided_idxs.contains(&i) {
+                continue;
+            }
             let (x, y) = cart.next_pos();
             if let Some(collision) = State::cart_at(&next_carts, x, y)
-                .or_else(|| State::cart_at(&self.carts[i + 1..], x, y))
             {
-                return Err(collision.pos);
+                collisions.push((x, y));
+                next_carts.remove(collision);
+            } else if let Some(collision) = State::cart_at(&self.carts[i + 1..], x, y) {
+                collisions.push((x, y));
+                collided_idxs.push(collision + i + 1);
+            } else {                
+                let track_type = self.track.at(x, y);
+                let dir = cart.next_dir(track_type);
+                let intersections = if let TrackType::Intersection = track_type {
+                    cart.intersections + 1
+                } else {
+                    cart.intersections
+                };
+                let i = next_carts
+                    .binary_search_by_key(&(y, x), |&Cart { pos: (x, y), .. }| (y, x))
+                    .unwrap_or_else(|x| x);
+                next_carts.insert(
+                    i,
+                    Cart {
+                        pos: (x, y),
+                        dir,
+                        intersections,
+                    },
+                );
             }
-            let track_type = self.track.at(x, y);
-            let dir = cart.next_dir(track_type);
-            let intersections = if let TrackType::Intersection = track_type {
-                cart.intersections + 1
-            } else {
-                cart.intersections
-            };
-            let i = next_carts
-                .binary_search_by_key(&(y, x), |&Cart { pos: (x, y), .. }| (y, x))
-                .unwrap_or_else(|x| x);
-            next_carts.insert(
-                i,
-                Cart {
-                    pos: (x, y),
-                    dir,
-                    intersections,
-                },
-            );
         }
         self.carts = next_carts;
-        Ok(())
-    }
-}
-
-impl fmt::Display for State {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for (i, c) in self.track.track.chars().enumerate() {
-            let (x, y) = self.pos(i);
-            if let Some(cart) = State::cart_at(&self.carts, x, y) {
-                let c = match cart.dir {
-                    Direction::Up => '^',
-                    Direction::Down => 'v',
-                    Direction::Left => '<',
-                    Direction::Right => '>',
-                };
-                c.fmt(f)?;
-            } else {
-                c.fmt(f)?;
-            }
-        }
-        Ok(())
+        collisions
     }
 }
 
 fn main() {
     let mut state = State::new(include_str!("input.txt"));
     let (x, y) = loop {
-        println!("{}", state);
-        if let Err(pos) = state.tick() {
-            break pos;
+        let collisions = state.tick();
+        if !collisions.is_empty() {
+            break collisions[0];
         }
     };
+    println!("{},{}", x, y);
+    while state.carts.len() > 1 {
+        state.tick();
+    }
+    let (x, y) = state.carts[0].pos;
     println!("{},{}", x, y);
 }
