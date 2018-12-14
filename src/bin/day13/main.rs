@@ -93,10 +93,10 @@ impl Cart {
 
 #[derive(Debug)]
 struct Track(Vec<Vec<TrackType>>);
-    
+
 impl Track {
-    fn at(&self, x: usize, y: usize) -> TrackType {        
-        self.0[y][x] 
+    fn at(&self, x: usize, y: usize) -> TrackType {
+        self.0[y][x]
     }
 }
 
@@ -109,34 +109,43 @@ struct State {
 impl State {
     fn new(input: &str) -> Self {
         let mut carts = Vec::new();
-        let track = input.lines().enumerate().map(|(y, line)| line.chars().enumerate().map(|(x, c)| {
-            use self::{Direction::*, TrackType::*};
-            match c {
-                '|' => Vertical,
-                '-' => Horizontal,
-                '\\' => Diagonal,
-                '/' => Antidiagonal,
-                '+' => Intersection,
-                // look at these cute friends!!!!!!
-                '^' => {
-                    carts.push(Cart::new(x, y, Up));
-                    Vertical
-                },
-                'v' => {
-                    carts.push(Cart::new(x, y, Down));
-                    Vertical
-                },
-                '<' => {
-                    carts.push(Cart::new(x, y, Left));
-                    Horizontal
-                },
-                '>' => {
-                    carts.push(Cart::new(x, y, Right));
-                    Horizontal
-                },
-                _ => Empty,
-            }
-        }).collect()).collect();
+        let track = input
+            .lines()
+            .enumerate()
+            .map(|(y, line)| {
+                line.chars()
+                    .enumerate()
+                    .map(|(x, c)| {
+                        use self::{Direction::*, TrackType::*};
+                        match c {
+                            '|' => Vertical,
+                            '-' => Horizontal,
+                            '\\' => Diagonal,
+                            '/' => Antidiagonal,
+                            '+' => Intersection,
+                            // look at these cute friends!!!!!!
+                            '^' => {
+                                carts.push(Cart::new(x, y, Up));
+                                Vertical
+                            }
+                            'v' => {
+                                carts.push(Cart::new(x, y, Down));
+                                Vertical
+                            }
+                            '<' => {
+                                carts.push(Cart::new(x, y, Left));
+                                Horizontal
+                            }
+                            '>' => {
+                                carts.push(Cart::new(x, y, Right));
+                                Horizontal
+                            }
+                            _ => Empty,
+                        }
+                    })
+                    .collect()
+            })
+            .collect();
 
         carts.sort_by_key(|&Cart { pos: (x, y), .. }| (y, x));
 
@@ -145,7 +154,6 @@ impl State {
             track: Track(track),
         }
     }
-
 
     fn cart_at(carts: &[Cart], x: usize, y: usize) -> Option<usize> {
         carts
@@ -162,14 +170,13 @@ impl State {
                 continue;
             }
             let (x, y) = cart.next_pos();
-            if let Some(collision) = State::cart_at(&next_carts, x, y)
-            {
+            if let Some(collision) = State::cart_at(&next_carts, x, y) {
                 collisions.push((x, y));
                 next_carts.remove(collision);
             } else if let Some(collision) = State::cart_at(&self.carts[i + 1..], x, y) {
                 collisions.push((x, y));
                 collided_idxs.push(collision + i + 1);
-            } else {                
+            } else {
                 let track_type = self.track.at(x, y);
                 let dir = cart.next_dir(track_type);
                 let intersections = if let TrackType::Intersection = track_type {
