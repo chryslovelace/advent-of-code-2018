@@ -48,7 +48,7 @@ fn part2() {
             .windows(6)
             .enumerate()
             .rev()
-            .take(3)
+            .take(2)
             .find(|&(_, w)| w == &input[..])
         {
             break i;
