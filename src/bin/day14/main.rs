@@ -1,5 +1,3 @@
-use std::cmp::max;
-
 struct State {
     recipes: Vec<u8>,
     elves: [usize; 2],
@@ -26,14 +24,6 @@ impl State {
             *elf %= self.recipes.len();
         }
     }
-
-    fn back_offset(&self) -> usize {
-        max(8, self.recipes.len()) - 8
-    }
-
-    fn back(&self) -> &[u8] {
-        &self.recipes[self.back_offset()..]
-    }
 }
 
 fn part1() {
@@ -53,8 +43,15 @@ fn part2() {
     let input = [7, 9, 3, 0, 3, 1];
     let pos = loop {
         state.run();
-        if let Some(matched) = state.back().windows(6).position(|w| w == &input[..]) {
-            break state.back_offset() + matched;
+        if let Some((i, _)) = state
+            .recipes
+            .windows(6)
+            .enumerate()
+            .rev()
+            .take(3)
+            .find(|&(_, w)| w == &input[..])
+        {
+            break i;
         }
     };
     println!("{}", pos);
