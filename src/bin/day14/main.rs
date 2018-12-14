@@ -2,14 +2,14 @@ use std::cmp::max;
 
 struct State {
     recipes: Vec<u8>,
-    elves: Vec<usize>,
+    elves: [usize; 2],
 }
 
 impl State {
     fn new() -> Self {
         State {
             recipes: vec![3, 7],
-            elves: vec![0, 1],
+            elves: [0, 1],
         }
     }
 
