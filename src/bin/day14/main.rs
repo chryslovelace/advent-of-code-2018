@@ -14,7 +14,7 @@ impl State {
     fn run(&mut self) {
         let sum: u8 = self.elves.iter().map(|&i| self.recipes[i]).sum();
         if sum >= 10 {
-            self.recipes.push(sum / 10);
+            self.recipes.push(1);
             self.recipes.push(sum % 10);
         } else {
             self.recipes.push(sum);
