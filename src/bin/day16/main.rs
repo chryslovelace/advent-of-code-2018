@@ -191,7 +191,7 @@ fn parse_program(opcode_mapping: &HashMap<usize, Opcode>) -> Vec<Inst> {
 }
 
 fn part1() {
-    println!("{}", SAMPLES.iter().filter(|s| s.opcode_candidates().iter().count() >= 3).count());
+    println!("{}", SAMPLES.iter().filter(|s| s.opcode_candidates().len() >= 3).count());
 }
 
 fn part2() {
