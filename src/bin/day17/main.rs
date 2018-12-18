@@ -3,7 +3,15 @@
 use itertools::{iproduct, Itertools};
 use lazy_static::lazy_static;
 use scan_fmt::scan_fmt;
-use std::{collections::{HashMap, VecDeque}, fmt, iter::repeat, ops::RangeInclusive, time::Duration, thread::sleep};
+use std::{
+    collections::{
+        HashMap,
+        HashSet,  
+        VecDeque
+    }, 
+    iter::repeat, 
+    ops::RangeInclusive
+};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {
@@ -11,7 +19,6 @@ enum Tile {
     Clay,
     FlowingWater,
     RestingWater,
-    Spring,
 }
 
 impl Tile {
@@ -21,7 +28,6 @@ impl Tile {
             Tile::Clay => false,
             Tile::FlowingWater => true,
             Tile::RestingWater => false,
-            Tile::Spring => true,
         }
     }
 }
@@ -44,6 +50,7 @@ lazy_static! {
     };    
 }
 
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
 enum FlowTask {
     FlowDown(usize, usize),
     FillOrSpill(usize, usize),
@@ -72,12 +79,11 @@ struct State {
 
 impl State {
     fn initial() -> Self {
-        let mut tiles = CLAY_POSITIONS
+        let tiles = CLAY_POSITIONS
             .iter()
             .cloned()
             .zip(repeat(Tile::Clay))
             .collect::<HashMap<(usize, usize), Tile>>();
-        tiles.insert((500, 0), Tile::Spring);
         let (xmin, xmax) = tiles
             .keys()
             .map(|&(x, _)| x)
@@ -118,19 +124,19 @@ impl State {
     }
 
     fn run(&mut self) {
-        self.flowtasks.push_back(FlowTask::FlowDown(500, 1));
+        let mut seen = HashSet::new();
+        self.flowtasks.push_back(FlowTask::FlowDown(500, *self.ybounds.start()));
         while let Some(task) = self.flowtasks.pop_front() {
-            if self.task_inbounds(&task) {
-                let mut next = self.perform_task(task);
-                next.retain(|t| self.task_inbounds(t));
+            if self.task_inbounds(&task) && !seen.contains(&task) {
+                seen.insert(task);
+                let next = self.perform_task(task);
                 self.flowtasks.extend(next);
             }
-            print!("{}[2J", 27 as char);
-            println!("{}", self.flowtasks.len());
         }
     }
 
     fn perform_task(&mut self, task: FlowTask) -> Vec<FlowTask> {
+        let mut next = Vec::new();
         match task {
             FlowTask::FlowDown(x, mut y) => {
                 while self.inbounds(x, y) && self.at(x, y).is_passable() {
@@ -138,9 +144,7 @@ impl State {
                     y += 1;
                 }
                 if self.inbounds(x, y) {
-                    vec![FlowTask::FillOrSpill(x, y - 1)]
-                } else {
-                    vec![]
+                    next.push(FlowTask::FillOrSpill(x, y - 1));
                 }
             },
             FlowTask::FillOrSpill(x, y) => {
@@ -149,29 +153,39 @@ impl State {
                         for x in left + 1..right {
                             self.insert(x, y, Tile::RestingWater);
                         }
-                        vec![FlowTask::FillOrSpill(x, y - 1)]
+                        next.push(FlowTask::FillOrSpill(x, y - 1));
                     },
                     (FlowEnd::Wall(left), FlowEnd::Edge(right)) => {
                         for x in left + 1..=right {
                             self.insert(x, y, Tile::FlowingWater);
                         }
-                        vec![FlowTask::FlowDown(right, y + 1)]
+                        if self.at(right, y + 1) != Tile::FlowingWater {
+                            next.push(FlowTask::FlowDown(right, y + 1));
+                        }
                     },
                     (FlowEnd::Edge(left), FlowEnd::Wall(right)) => {
                         for x in left..right {
                             self.insert(x, y, Tile::FlowingWater);
                         }
-                        vec![FlowTask::FlowDown(left, y + 1)]
+                        if self.at(left, y + 1) != Tile::FlowingWater {
+                            next.push(FlowTask::FlowDown(left, y + 1)); 
+                        }
                     },
                     (FlowEnd::Edge(left), FlowEnd::Edge(right)) => {
                         for x in left..=right {
                             self.insert(x, y, Tile::FlowingWater);
                         }
-                        vec![FlowTask::FlowDown(left, y + 1), FlowTask::FlowDown(right, y + 1)]
+                        if self.at(right, y + 1) != Tile::FlowingWater {
+                            next.push(FlowTask::FlowDown(right, y + 1));
+                        }
+                        if self.at(left, y + 1) != Tile::FlowingWater {
+                            next.push(FlowTask::FlowDown(left, y + 1)); 
+                        }
                     },
                 }
             }
-        }
+        };
+        next
     }
 
     fn flow_ends(&self, x: usize, y: usize) -> (FlowEnd, FlowEnd) {
@@ -200,24 +214,9 @@ impl State {
     fn watered_tiles(&self) -> usize {
         self.tiles.values().filter(|&&tile| tile == Tile::FlowingWater || tile == Tile::RestingWater).count()
     }
-}
 
-impl fmt::Display for State {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for y in self.ybounds.clone() {
-            for x in self.xbounds.clone() {
-                let c = match self.at(x, y) {
-                    Tile::Sand => '.',
-                    Tile::Clay => '#',
-                    Tile::FlowingWater => '|',
-                    Tile::RestingWater => '~',
-                    Tile::Spring => '+',
-                };
-                c.fmt(f)?;
-            }
-            '\n'.fmt(f)?;
-        }
-        Ok(())
+    fn resting_water(&self) -> usize {
+        self.tiles.values().filter(|&&tile| tile == Tile::RestingWater).count()
     }
 }
 
@@ -225,4 +224,5 @@ fn main() {
     let mut state = State::initial();
     state.run();
     println!("{}", state.watered_tiles());
+    println!("{}", state.resting_water());
 }
