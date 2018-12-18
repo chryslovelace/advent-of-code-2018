@@ -6,7 +6,7 @@ use std::{
     fmt,
 };
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy)]
 enum Acre {
     Ground,
     Trees,

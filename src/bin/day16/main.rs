@@ -1,7 +1,7 @@
-use scan_fmt::scan_fmt;
-use std::collections::{HashMap, HashSet, hash_map::Entry};
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use scan_fmt::scan_fmt;
+use std::collections::{hash_map::Entry, HashMap, HashSet};
 
 type Registers = [usize; 4];
 
@@ -69,12 +69,48 @@ impl Inst {
             Bori => registers[self.a] | self.b,
             Setr => registers[self.a],
             Seti => self.a,
-            Gtir => if self.a > registers[self.b] { 1 } else { 0 },
-            Gtri => if registers[self.a] > self.b { 1 } else { 0 },
-            Gtrr => if registers[self.a] > registers[self.b] { 1 } else { 0 },
-            Eqir => if self.a == registers[self.b] { 1 } else { 0 },
-            Eqri => if registers[self.a] == self.b { 1 } else { 0 },
-            Eqrr => if registers[self.a] == registers[self.b] { 1 } else { 0 },
+            Gtir => {
+                if self.a > registers[self.b] {
+                    1
+                } else {
+                    0
+                }
+            }
+            Gtri => {
+                if registers[self.a] > self.b {
+                    1
+                } else {
+                    0
+                }
+            }
+            Gtrr => {
+                if registers[self.a] > registers[self.b] {
+                    1
+                } else {
+                    0
+                }
+            }
+            Eqir => {
+                if self.a == registers[self.b] {
+                    1
+                } else {
+                    0
+                }
+            }
+            Eqri => {
+                if registers[self.a] == self.b {
+                    1
+                } else {
+                    0
+                }
+            }
+            Eqrr => {
+                if registers[self.a] == registers[self.b] {
+                    1
+                } else {
+                    0
+                }
+            }
         }
     }
 }
@@ -95,7 +131,7 @@ impl Sample {
             .cloned()
             .filter(|&opcode| {
                 let inst = Inst::new(opcode, self.a, self.b, self.c);
-                let mut test = self.before.clone();
+                let mut test = self.before;
                 inst.exec(&mut test);
                 test == self.after
             })
@@ -105,7 +141,7 @@ impl Sample {
 
 fn line_to_regs(line: &str) -> Registers {
     [
-        line[9..10].parse().unwrap(), 
+        line[9..10].parse().unwrap(),
         line[12..13].parse().unwrap(),
         line[15..16].parse().unwrap(),
         line[18..19].parse().unwrap(),
@@ -120,7 +156,8 @@ lazy_static! {
             .map(|(before, inst, after, _)| {
                 let before = line_to_regs(before);
                 let after = line_to_regs(after);
-                let (opcode, a, b, c) = scan_fmt!(inst, "{d} {d} {d} {d}", usize, usize, usize, usize);
+                let (opcode, a, b, c) =
+                    scan_fmt!(inst, "{d} {d} {d} {d}", usize, usize, usize, usize);
                 let (opcode, a, b, c) = (opcode.unwrap(), a.unwrap(), b.unwrap(), c.unwrap());
                 Sample {
                     before,
@@ -132,7 +169,7 @@ lazy_static! {
                 }
             })
             .collect()
-    };    
+    };
 }
 
 fn map_opcodes() -> HashMap<usize, Opcode> {
@@ -141,9 +178,10 @@ fn map_opcodes() -> HashMap<usize, Opcode> {
         let sample_candidates = sample.opcode_candidates();
         match candidates.entry(sample.opcode) {
             Entry::Occupied(mut entry) => {
-                entry.get_mut().retain(|opcode| sample_candidates.contains(opcode));
-
-            },
+                entry
+                    .get_mut()
+                    .retain(|opcode| sample_candidates.contains(opcode));
+            }
             Entry::Vacant(entry) => {
                 entry.insert(sample_candidates);
             }
@@ -156,8 +194,9 @@ fn map_opcodes() -> HashMap<usize, Opcode> {
             mapping.insert(n, opcode);
             mapped.insert(opcode);
         }
-
-        if mapping.len() >= OPCODES.len() { break; }
+        if mapping.len() >= OPCODES.len() {
+            break;
+        }
     }
 
     mapping
@@ -184,14 +223,22 @@ fn parse_program(opcode_mapping: &HashMap<usize, Opcode>) -> Vec<Inst> {
         .lines()
         .map(|line| {
             let (opcode, a, b, c) = scan_fmt!(line, "{d} {d} {d} {d}", usize, usize, usize, usize);
-            let (opcode, a, b, c) = (opcode_mapping[&opcode.unwrap()], a.unwrap(), b.unwrap(), c.unwrap());
-            Inst::new(opcode, a, b, c)
+            Inst::new(
+                opcode_mapping[&opcode.unwrap()],
+                a.unwrap(),
+                b.unwrap(),
+                c.unwrap(),
+            )
         })
         .collect()
 }
 
 fn part1() {
-    println!("{}", SAMPLES.iter().filter(|s| s.opcode_candidates().len() >= 3).count());
+    let count = SAMPLES
+        .iter()
+        .filter(|s| s.opcode_candidates().len() >= 3)
+        .count();
+    println!("{}", count);
 }
 
 fn part2() {
