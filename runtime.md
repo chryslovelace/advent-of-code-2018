@@ -16,3 +16,7 @@ runtime measured with `powershell -Command "Measure-Command {target/release/dayX
 12| 21.5346
 13| 12.8714
 14| 374.9491
+15| (incomplete)
+16| 36.5873
+17| 43.4196
+18| 145.8337
