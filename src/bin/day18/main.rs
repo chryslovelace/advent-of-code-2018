@@ -89,6 +89,14 @@ impl State {
         }
         trees * lumberyard
     }
+
+    fn buffer(&self) -> Vec<u8> {
+        self.0.iter().flat_map(|row| row.iter().map(|acre| match acre {
+            Acre::Ground => 0,
+            Acre::Trees => 1,
+            Acre::Lumberyard => 2,
+        })).collect()
+    }
 }
 
 impl fmt::Display for State {
@@ -159,7 +167,31 @@ fn part2() {
     println!("{}", state.resource_value());
 }
 
+fn render() {
+    // also jewel's idea~
+    use gif::{Frame, Encoder, Repeat, SetParameter}; 
+    use std::fs::File;
+
+    let mut state = INITIAL_STATE.clone();
+    let (width, height) = (state.0[0].len() as u16, state.0.len() as u16);
+    let color_map = [0, 0, 0, 0x0b, 0x66, 0x23, 0x8b, 0x45, 0x13];
+    let mut image = File::create("day18.gif").unwrap();
+    let mut encoder = Encoder::new(&mut image, width, height, &color_map).unwrap();
+    encoder.set(Repeat::Infinite).unwrap();
+    for _ in 0..2000 {
+        let frame = Frame {
+            width,
+            height,
+            buffer: state.buffer().into(),
+            ..Frame::default()
+        };
+        encoder.write_frame(&frame).unwrap();
+        state = state.next_state();
+    }
+}
+
 fn main() {
     part1();
     part2();
+    render();    
 }
